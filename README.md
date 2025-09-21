@@ -11,3 +11,7 @@ what Audi cars are most loves, common issues with Audis, mods that are popular i
 2. Identify common issues, popular modifications, and recurring themes in the Audi community.
 3. Compare mentions and engagement across Audi A4, A6, Q5, S5, R8, etc.
 4. Track patterns in upvotes, comments, and posting activity (e.g., which models get the most community attention).
+
+## Data Architecture
+<img width="1231" height="441" alt="Rakuten Data Pipeline High Level Architecture drawio" src="https://github.com/user-attachments/assets/da1e1920-04e1-4f19-9e0c-ccd38e7508a2" />
+

@@ -4,52 +4,124 @@ and structures key fields (title, author, score, etc.).
 It then serializes the data as JSON and 
 uploads it into a date-based folder in Azure Blob Storage.'''
 
-import pandas as pd
-from sqlalchemy import create_engine
-import urllib.parse
+import azure.functions as func
+import logging
 import os
+import requests
+import requests.auth
+import json
+from azure.storage.blob import BlobServiceClient
+from datetime import datetime
 
-server = "audi-pipeline-sql-server.database.windows.net"
-database = "audipipelineDB"
-username = os.environ.get('username')
-password = os.environ.get('password')
-driver = "ODBC Driver 17 for SQL Server"
+app = func.FunctionApp()
 
-def get_engine():
-    quoted_username = urllib.parse.quote_plus(username)
-    quoted_password = urllib.parse.quote_plus(password)
-    quoted_driver = urllib.parse.quote_plus(driver)
-    connection_string = (
-        f"mssql+pyodbc://{quoted_username}:{quoted_password}@{server}:1433/{database}"
-        f"?driver={quoted_driver}&Encrypt=yes&TrustServerCertificate=no&Connection Timeout=30"
+@app.schedule(schedule="0 0 0 1 * *", arg_name="mytimer", run_on_startup=False, use_monitor=True)
+def audi_reddit_etl(mytimer: func.TimerRequest) -> None:
+    logging.info('Audi Reddit ETL timer function triggered.')
+
+    # Load credentials from environment variables
+    CLIENT_ID = os.environ.get("REDDIT_CLIENT_ID")
+    CLIENT_SECRET = os.environ.get("REDDIT_CLIENT_SECRET")
+    USERNAME = os.environ.get("REDDIT_USERNAME")
+    PASSWORD = os.environ.get("REDDIT_PASSWORD")
+    USER_AGENT = os.environ.get("REDDIT_USER_AGENT", "AudiPipeline/0.0.1")
+    BLOB_CONN_STR = os.environ.get("BLOB_CONN_STR")
+    BLOB_CONTAINER = os.environ.get("BLOB_CONTAINER", "reddit-data")
+
+    # Authenticate with Reddit
+    client_auth = requests.auth.HTTPBasicAuth(CLIENT_ID, CLIENT_SECRET)
+    post_data = {"grant_type": "password", "username": USERNAME, "password": PASSWORD}
+    headers = {"User-Agent": USER_AGENT}
+    token_res = requests.post(
+        "https://www.reddit.com/api/v1/access_token",
+        data=post_data,
+        headers=headers,
+        auth=client_auth
     )
-    return create_engine(connection_string)
+    if token_res.status_code != 200:
+        logging.error(f"Reddit auth failed: {token_res.text}, {token_res.status_code}")
+        return
+    token_id = token_res.json()["access_token"]
 
-def load_data_to_sql(df, table_name, schema="dbo", if_exists="replace"):
-    engine = get_engine()
-    df.to_sql(table_name, con=engine, schema=schema, if_exists=if_exists, index=False)
-    print(f"✅ Data loaded into {schema}.{table_name}")
+    # OAuth headers
+    headers_get = {
+        "User-Agent": USER_AGENT,
+        "Authorization": f"Bearer {token_id}"
+    }
 
-def enrich_data():
-    csv_df = pd.read_csv(r"C:\Users\JIMMY OKOTH\Desktop\reddit_posts_original.csv")
-    json_df = pd.read_csv(r"C:\Users\JIMMY OKOTH\Desktop\reddit_posts_json.csv")
+    # Fetch posts function
+    def fetch_posts(endpoint, max_posts=1000):
+        all_posts = []
+        after = None
+        while len(all_posts) < max_posts:
+            params = {"limit": 100, "after": after}
+            resp = requests.get("https://oauth.reddit.com" + endpoint, headers=headers_get, params=params)
+            if resp.status_code != 200:
+                break
+            data = resp.json()["data"]
+            children = data.get("children", [])
+            if not children:
+                break
+            for post in children:
+                p = post["data"]
+                all_posts.append({
+                    "id": p.get("id"),
+                    "subreddit": p.get("subreddit"),
+                    "title": p.get("title"),
+                    "selftext": p.get("selftext"),
+                    "author": p.get("author"),
+                    "created_utc": p.get("created_utc"),
+                    "score": p.get("score"),
+                    "num_comments": p.get("num_comments"),
+                    "upvote_ratio": p.get("upvote_ratio"),
+                    "link_flair_text": p.get("link_flair_text"),
+                    "permalink": "https://reddit.com" + p.get("permalink", ""),
+                    "url": p.get("url"),
+                    "subreddit_subscribers": p.get("subreddit_subscribers"),
+                    "source": endpoint
+                })
+            after = data.get("after")
+            if after is None:
+                break
+        return all_posts
 
-    csv_df.columns = [c.lower().strip() for c in csv_df.columns]
-    json_df.columns = [c.lower().strip() for c in json_df.columns]
+    # Subreddit sources
+    sources = {
+        "Audi_new": "/r/Audi/new",
+        "Audi_hot": "/r/Audi/hot",
+        "Audi_top": "/r/Audi/top",
+        "Audi_best": "/r/Audi/best",
+        "AudiA4_best": "/r/AudiA4/best",
+        "AudiS4_best": "/r/AudiS4/best",
+        "AudiS5_best": "/r/audis5/best",
+        "AudiQ6_best": "/r/AudiQ6/best",
+        "AudiQ5_best": "/r/AudiQ5/best",
+        "AudiA6_best": "/r/AudiA6/best",
+        "AudiR8_best": "/r/audir8/best",
+        "AudiQ7_best": "/r/AudiQ7/best",
+        "AudiQ3_best": "/r/AudiQ3/best",
+        "AudiA3_best": "/r/AudiA3/best",
+    }
 
-    merged_df = pd.merge(csv_df, json_df, on="id", how="outer", suffixes=("_csv", "_json"))
+    all_data = []
+    for source, endpoint in sources.items():
+        posts = fetch_posts(endpoint, max_posts=100)
+        for p in posts:
+            p["source"] = source
+        all_data.extend(posts)
 
-    def pick_value(row, col):
-        return row[f"{col}_json"] if pd.notnull(row.get(f"{col}_json")) else row.get(f"{col}_csv")
+    if not all_data:
+        logging.info("No data fetched from Reddit.")
+        return
 
-    final_df = pd.DataFrame()
-    final_df["id"] = merged_df["id"]
-    for col in [c.replace("_csv", "") for c in merged_df.columns if "_csv" in c]:
-        final_df[col] = merged_df.apply(lambda r: pick_value(r, col), axis=1)
+    # Serialize data to JSON
+    json_data = json.dumps(all_data, ensure_ascii=False, indent=2)
 
-    final_df.drop_duplicates(subset=["title", "selftext"], inplace=True)
-    return final_df
+    # Upload to Azure Blob Storage
+    blob_service_client = BlobServiceClient.from_connection_string(BLOB_CONN_STR)
+    container_client = blob_service_client.get_container_client(BLOB_CONTAINER)
 
-if __name__ == "__main__":
-    df = enrich_data()
-    load_data_to_sql(df, table_name="audi_rdata", schema="bronze")
+    blob_name = f"bronze/{datetime.utcnow().strftime('%Y/%m')}/audi_reddit.json"
+    container_client.upload_blob(name=blob_name, data=json_data, overwrite=True)
+
+    logging.info(f"Fetched {len(all_data)} posts and uploaded to Azure Blob Storage as {blob_name}.")    

@@ -1,3 +1,11 @@
+''' This script does the following:
+
+1. It takes json data from Azure SQL table and locally available dataset in CSV format that acts as the base truth.
+2. It combines the two tables, removing duplicates (basically enriching the limited json data)
+3. Loads the data back to azure sql as a csv in the bronze layer
+
+'''
+
 import pandas as pd
 from sqlalchemy import create_engine
 import urllib.parse

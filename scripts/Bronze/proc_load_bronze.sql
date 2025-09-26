@@ -14,7 +14,7 @@ Usage Example: EXEC Bronze.load_bronze
 CREATE OR ALTER PROCEDURE Bronze.load_bronze AS
 BEGIN
 --Create a start time and end time operator to calculate load times for the table and the entire bronze layer
-DECLARE @start_time DATETIME, @end_time DATETIME, @batch_start_time DATETIME, @batch_end_time DATETIME;
+DECLARE @batch_start_time DATETIME, @batch_end_time DATETIME;
 	--Try
 	BEGIN TRY
 		

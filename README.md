@@ -15,6 +15,7 @@ what Audi cars are most loves, common issues with Audis, mods that are popular i
 ## Data Architecture
 <img width="1231" height="441" alt="Rakuten Data Pipeline High Level Architecture drawio" src="https://github.com/user-attachments/assets/da1e1920-04e1-4f19-9e0c-ccd38e7508a2" />
 There are six layers in my architecture:
+
 1. **Bronze Landing** - This layer consists of two files. A JSON file that is uploaded to Azure Blob storage (however, it is limited). And, a CSV file that has data spanning across several months that acts as my source of truth.
  
 3. **Bronze Raw** - The JSON file from the Landing Layer is transformed to CSV in this section and uploaded to Azure SQL through ADF.
@@ -23,5 +24,4 @@ There are six layers in my architecture:
 
 7. **Silver Enriched** - Here, more data cleaning is done, dropping unwanted columns, categorizing text data, converting BIGINT to datetime where necessary, and renaming columns.
 
-9. **Gold Curated** - Since this dataset isn't transactional, I thought there's no need to classify the tables here as facts or dims. However, I have two tables. Categorized and uncategorized. The categorized consist of text data that has been categorized, think of engine issues, HVAC, brake issues, suspension issues. The latter is uncategorized, with customer sentiments not easily understood, so machine analysis might need to take place here to make sense of the issues. I'll probably handle this in the future when I get my hands dirty with machine learning. 
-   
+9. **Gold Curated** - Since this dataset isn't transactional, I thought there's no need to classify the tables here as facts or dims. However, I have two tables. Categorized and uncategorized. The categorized consist of text data that has been categorized, think of engine issues, HVAC, brake issues, suspension issues. The latter is uncategorized, with customer sentiments not easily understood, so machine analysis might need to take place here to make sense of the issues. I'll probably handle this in the future when I get my hands dirty with machine learning.

@@ -37,3 +37,28 @@ The chart above shows the most mentioned Audi issues in the subreddits I pulled 
 
 Overall, I organized the issues into system-level categories like **Engine, Exhaust, Cooling, Suspension, Transmission, Electrical & Lighting, Emission Control, HVAC, Hybrid/Electric, Tires & Wheels, Tools & Equipment, and Audi Accessories**. This makes it easier to see which areas Audi owners talk about the most.
 
+**Business sense**: This categorization highlights where Audi owners face the most recurring challenges (engine, brakes, HVAC, etc.). For a company, this insight can guide product improvements, targeted maintenance campaigns, or parts stocking strategies, ensuring resources go where customers actually experience problems.
+
+## Top Models
+<img width="803" height="345" alt="Top Audi Models" src="https://github.com/user-attachments/assets/bfb950bf-75d8-4dff-aa7f-ad9828362a63" />
+
+Every Audi I could think of is here. I also used Perplexity to research all Audi Models between 1990 and 2025 to make the dataset more meaningful. Kinda sad Audi s5 didn't take the lead but quite satified with the findings.
+
+**Business sense**: Knowing which models dominate online discussions can help prioritize after-sales strategies, marketing campaigns, or recall/repair readiness. For example, if certain models generate more buzz (positive or negative), dealerships and service centers can tailor support accordingly.
+
+## Trending Issues Over Time
+<img width="960" height="380" alt="Trending Issues by Month" src="https://github.com/user-attachments/assets/1ef523cd-33e7-4bfa-89a2-3e50e939d696" />
+
+The chart shows which issues are takled about all-year round. And since the data is from 2023 onwards, we can see a spike in Electrical or Hybrid issues with Audi Models arriving in he market during Fall (September or later). Engine issues are constant year-round. And audi accessories are rarely talked about.
+
+**Business sense**: Tracking issues over time provides a forecasting advantage. For example, rising mentions of hybrid/electric issues could signal where future service training, spare parts, or warranty coverage should focus, especially as Audi expands its EV lineup. Insurance companies can use the insights to better price their premiums for hybrid and electric cars, especially with the rise of complaints.
+
+## Engagement per Issue
+<img width="958" height="343" alt="engagement per issue - Copy" src="https://github.com/user-attachments/assets/80636e13-0985-4b1d-bb9a-d216da41f28e" />
+
+I also wanted to know which issues get the most attention. So, I used SQL to count the no. of comments per user issue. Found the HVAC (Heating, Ventilation, and Air Condition) topics had the most engagements, followed by hybrid or electrical issues. 
+
+**Business sense**: High engagement means these issues matter most to Audi owners. For a business, this highlights customer pain points and brand perception risks. Prioritizing fixes in these areas could reduce frustration, strengthen customer loyalty, and even drive new product/service opportunities (e.g., extended warranties or specialized service packages).
+
+
+

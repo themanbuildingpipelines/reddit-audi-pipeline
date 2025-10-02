@@ -13,6 +13,7 @@ competitors of Audi cars, etc.
 --Drop if exits then recreate
 IF OBJECT_ID('Gold.audi_data_uncategorized', 'V') IS NOT NULL
     DROP VIEW Gold.audi_data_uncategorized;
+GO
 --recreating
 CREATE VIEW Gold.audi_data_uncategorized AS 
 SELECT
@@ -22,14 +23,18 @@ SELECT
     url AS source_url,
     user_issue,
     issue_raise_date,
-    issue_category 
+    issue_category,
+    car_model,
+    year_model,
+    mileage 
 FROM Silver.audi_data_enriched
-WHERE issue_category = 'Uncategorized'
+WHERE issue_category = 'Uncategorized';
 GO
 
 --Gold view for categorized data for Data Analysts/BI Engineers to make meaning of
 IF OBJECT_ID('Gold.audi_data_categorized', 'V') IS NOT NULL
     DROP VIEW Gold.audi_data_categorized;
+GO
 
 --recreating
 CREATE VIEW Gold.audi_data_categorized AS 
@@ -40,7 +45,10 @@ SELECT
     url AS source_url,
     user_issue,
     issue_raise_date,
-    issue_category 
+    issue_category,
+    car_model,
+    year_model,
+    mileage  
 FROM Silver.audi_data_enriched
-WHERE issue_category != 'Uncategorized'
+WHERE issue_category != 'Uncategorized';
 GO

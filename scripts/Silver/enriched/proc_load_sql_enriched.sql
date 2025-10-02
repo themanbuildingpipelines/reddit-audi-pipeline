@@ -24,26 +24,34 @@ DECLARE @batch_start_time DATETIME, @batch_end_time DATETIME;
             url,
             user_issue,
             issue_raise_date,
-            issue_category
+            issue_category,
+            car_model,
+            year_model,
+            mileage
         )
         SELECT
             id,
             CASE WHEN author = '[Deleted]' THEN 'n/a'
                 ELSE author
-            END AS username,
-            num_comments,
+            END AS author,
+            num_comments AS num_of_comments,
             url,
-            issue,
-            created_datetime,
-            categories 
+            issue AS user_issue,
+            created_datetime AS issue_raise_date,
+            categories AS issue_category,
+            car_model,
+            year_model,
+            mileage 
         FROM (
-        SELECT
-        *,
-        DENSE_RANK() OVER(PARTITION BY issue ORDER BY id) AS rank_issue
-        FROM Silver.audi_data_base)t
-        WHERE rank_issue = 1
+            SELECT
+                *,
+                DENSE_RANK() OVER(PARTITION BY issue ORDER BY id) AS rank_issue
+            FROM Silver.audi_data_base
+        ) t
+        WHERE rank_issue = 1;
+
         SET @batch_end_time = GETDATE();
-	    PRINT 'Batch Duration: ' + CAST(DATEDIFF(second, @batch_start_time, @batch_end_time) AS NVARCHAR) + ' ' + 'seconds';
+        PRINT 'Batch Duration: ' + CAST(DATEDIFF(second, @batch_start_time, @batch_end_time) AS NVARCHAR) + ' ' + 'seconds';
     END TRY
 
     BEGIN CATCH

@@ -1,22 +1,48 @@
 import pandas as pd
-from ETL_audi.cleaning_loading import load_data_to_sql, get_engine
+import re
+from cleaning_loading import load_data_to_sql, get_engine
 
+# -----------------------
+# 1. Connect to DB
+# -----------------------
 engine = get_engine()
 
-# 1. Read Bronze just to make sure everything runs nicely
+# -----------------------
+# 2. Read from Bronze
+# -----------------------
 df = pd.read_sql_table("audi_rdata", con=engine, schema="bronze")
-print("Bronze sample:")
+print("Bronze sample:", df.head())
 
-#2. Merge title and selftext, and store it as new_df and the column as issue
+# -----------------------
+# 3. Clean + Enrich
+# -----------------------
 
-df['issue'] = df['title'].fillna('') + ' ' + df['selftext'].fillna('')
+# Merge title + selftext into "issue"
+if 'title' in df.columns and 'selftext' in df.columns:
+    df['issue'] = df['title'].fillna('') + ' ' + df['selftext'].fillna('')
+else:
+    df['issue'] = ''
 
-#3. Convert UTC to a datetime to make it easy to work with in SQL
-df['created_datetime'] = pd.to_datetime(df['created_utc'], unit='s')
+# Convert UTC timestamp → datetime
+if 'created_utc' in df.columns:
+    df['created_datetime'] = pd.to_datetime(df['created_utc'], unit='s')
+else:
+    df['created_datetime'] = pd.NaT
 
-#4. Drop unwanted columns
-df.drop(columns=['title', 'selftext', 'subreddit', 'upvote_ratio', 'subreddit_subscribers', 'permalink', 'source', 'link_flair_text', 'created_utc'], inplace=True, errors="ignore")
+# Drop unwanted columns
+df.drop(
+    columns=[
+        'title', 'selftext', 'subreddit', 'upvote_ratio',
+        'subreddit_subscribers', 'permalink', 'source',
+        'link_flair_text', 'created_utc'
+    ],
+    inplace=True,
+    errors="ignore"
+)
 
+# -----------------------
+# 3a. Categorization
+# -----------------------
 def classify(text):
     text = text.lower()
     
@@ -102,12 +128,48 @@ def classify(text):
     
     return matches if matches else ["Uncategorized"]
 
-#Do the classification
 df['categories'] = df['issue'].apply(classify)
-
-# Flatten list into comma-separated string to make it readable in sql
 df['categories'] = df['categories'].apply(lambda x: ", ".join(x))
 
+# -----------------------
+# 3b. Extract car model, year, mileage
+# -----------------------
+audi_models = [
+    "A1","A2","A3","A4","A5","A6","A7","A8",
+    "Q2","Q3","Q4","Q5","Q7","Q8",
+    "S1","S3","S4","S5","S6","S7","S8",
+    "RS3","RS4","RS5","RS6","RS7","RSQ3","RSQ8",
+    "TT","TTS","TT RS",
+    "R8","e-tron","Q4 e-tron","RS e-tron GT"
+]
 
-# load to Silver.audi_data_base
+def extract_model(text):
+    for model in audi_models:
+        if re.search(rf"\b{model}\b", text, re.IGNORECASE):
+            return model
+    return None
+
+def extract_year(text):
+    match = re.search(r"(19[8-9]\d|20[0-2]\d)", text)
+    return int(match.group(0)) if match else None
+
+def extract_miles(text):
+    match = re.search(r"(\d{1,3}[,]?\d{0,3})\s?(miles|mi|k)", text, re.IGNORECASE)
+    if match:
+        val = match.group(1).replace(",", "")
+        num = int(val)
+        if "k" in match.group(0).lower():
+            num *= 1000
+        return num
+    return None
+
+df["car_model"] = df["issue"].apply(extract_model)
+df["year_model"] = df["issue"].apply(extract_year)
+df["mileage"] = df["issue"].apply(extract_miles)
+
+# -----------------------
+# 4. Load to Silver
+# -----------------------
 load_data_to_sql(df, "audi_data_base", schema="silver", if_exists="replace")
+
+print("Loaded enriched Silver table: silver.audi_data_base")

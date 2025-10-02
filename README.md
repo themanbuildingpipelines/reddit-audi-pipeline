@@ -25,3 +25,15 @@ There are six layers in my architecture:
 7. **Silver Enriched** - Here, more data cleaning is done, dropping unwanted columns, categorizing text data, converting BIGINT to datetime where necessary, and renaming columns.
 
 9. **Gold Curated** - Since this dataset isn't transactional, I thought there's no need to classify the tables here as facts or dims. However, I have two tables. Categorized and uncategorized. The categorized consist of text data that has been categorized, think of engine issues, HVAC, brake issues, suspension issues. The latter is uncategorized, with customer sentiments not easily understood, so machine analysis might need to take place here to make sense of the issues. I'll probably handle this in the future when I get my hands dirty with machine learning.
+
+## Visualization
+I was to use Power BI for visualization, but Tableau just worked way better for me than the former. Still have a lot to learn about visualization, but hey, if I keep waiting for the right time, this project might never get finished. So, I work with what I can and improve on what I have already published, as I continue to acquire more knowledge.
+
+## Top issues
+<img width="717" height="278" alt="Top issues" src="https://github.com/user-attachments/assets/8fd535ab-4a2d-4e6b-a6f0-87561e001853" />
+
+The chart above shows the most mentioned Audi issues in the subreddits I pulled data from. Issues range from engine to emission control to HVAC. 
+The chart above shows the most mentioned Audi issues in the subreddits I pulled data from. To make sense of all the different ways people describe problems, I grouped related terms into broader categories. For example, anything like fuel pump, injectors, or intake manifold falls under **Air and Fuel Delivery**, while brake pads, rotors, or ABS are grouped under **Brakes**. Mods like tuning, ECU, or turbo upgrades go into Mods, and parts like bumpers, grilles, or paint are categorized as **Body**.
+
+Overall, I organized the issues into system-level categories like **Engine, Exhaust, Cooling, Suspension, Transmission, Electrical & Lighting, Emission Control, HVAC, Hybrid/Electric, Tires & Wheels, Tools & Equipment, and Audi Accessories**. This makes it easier to see which areas Audi owners talk about the most.
+

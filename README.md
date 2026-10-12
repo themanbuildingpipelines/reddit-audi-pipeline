@@ -83,7 +83,7 @@ The first version ran on Azure. An Azure Function pulled posts monthly into Blob
 
 - **Categories with commas were split apart.** "Electrical, Lighting, Telematics" was being counted as three separate issues in every gold view. Categories are now joined with a pipe character and renamed.
 - **Keywords matched inside other words.** "ac" matched "back" and "track". Keywords now have to match whole words.
-- **Models were tagged by list order, not by what the post said first.** A post about the RS3 could be tagged as an e-tron because "e-tron" appeared later in the text. Now the first model mentioned wins.
+- **Models were tagged by list order, not by what the post said.** The code stopped at the first name in a fixed list, so a TT RS post was tagged as a plain TT and a Q4 e-tron as a plain Q4. Now the first model mentioned in the post wins, and the longer name wins a tie.
 - **Duplicates were dropped arbitrarily.** When the same post appears in several pulls, the copy with the most comments is kept, since it's usually the most recent.
 
 ## Run it yourself

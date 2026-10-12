@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audi Reddit insights</title>
+<meta name="description" content="What Audi owners talk about on Reddit: issues, replies and models, from the reddit-audi-pipeline project.">
+<style>
+@font-face { font-family: 'League Spartan'; font-style: normal; font-display: swap; font-weight: 100 900; src: url(assets/league-spartan.woff2) format('woff2'); }
+:root {
+  --color-fg: #16181c; --color-fg-muted: #5f6670; --color-bg: #f6f7f9; --color-panel: #ffffff; --color-border-line: #e3e6ea;
+  --color-ok: #1a7f4b; --color-warn: #e8a317; --color-bad: #c62f2f;
+  --ar-c1: #b3122e; --ar-c2: #8a96a3; --ar-c3: #2f6db5; --ar-c4: #d98a1c;
+  --cds-chart-muted: #d3d8de; --cds-chart-grid: #eceef1; --cds-chart-axis: #b9bfc7;
+  --cds-surface-popover: #ffffff; --cds-border: #dfe2e6; --cds-shadow-popover: 0 6px 20px rgba(15,20,30,.10); --cds-text-secondary: #5f6670;
+  --cds-gap-xs: 4px; --cds-gap-sm: 8px; --cds-gap-md: 16px; --cds-gap-lg: 24px; --cds-gap-xl: 32px;
+  --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-md: 12px; --cds-pad-lg: 20px; --cds-pad-xl: 28px;
+  --cds-radius: 10px; --cds-font-size-caption: 13px; --cds-font-size-body: 16px; --cds-font-size-heading: 19px; --cds-font-size-title: 34px;
+  --cds-font-weight-medium: 600; --cds-dur-slow: 320ms; --cds-ease-out: cubic-bezier(.2,.7,.2,1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-fg: #eceef1; --color-fg-muted: #a3aab4; --color-bg: #0f1114; --color-panel: #181b20; --color-border-line: #2a2f36;
+    --ar-c1: #e5484d; --ar-c2: #7d8b99; --cds-chart-muted: #3a4048; --cds-chart-grid: #23272d; --cds-chart-axis: #4a515a;
+    --cds-surface-popover: #1f2329; --cds-border: #333941; --cds-shadow-popover: 0 6px 20px rgba(0,0,0,.45); --cds-text-secondary: #a3aab4;
+  }
+}
+:root[data-theme="light"] { color-scheme: light; }
+html, body { margin: 0; background: var(--color-bg); }
+#dash-root { max-width: 1180px; margin: 0 auto; padding: 32px 16px 48px; box-sizing: border-box; }
+#dash-root .ar-repo { font-family: 'League Spartan', sans-serif; font-size: 13px; color: var(--color-fg-muted); margin-top: -12px; }
+#dash-root .ar-repo a { color: inherit; }
+</style>
+</head>
+<body>
+<div id="dash-root">
+<style>
+#dash-root .ar { --ar-font: 'League Spartan', ui-sans-serif, system-ui, sans-serif; font-family: var(--ar-font); color: var(--color-fg); display: flex; flex-direction: column; gap: var(--cds-gap-xl); }
+#dash-root .ar-head h1 { font-family: var(--ar-font); font-weight: 700; letter-spacing: -0.01em; font-size: var(--cds-font-size-title); margin: 0 0 var(--cds-gap-xs); }
+#dash-root .ar-head p { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-body); max-width: 60rem; line-height: 1.5; }
+#dash-root .ar-take { color: var(--color-fg); }
+#dash-root .ar b { font-weight: 500; }
+#dash-root .ar-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--cds-gap-md); }
+#dash-root .ar-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
+#dash-root .ar-kpi .lab { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+#dash-root .ar-kpi .num { font-family: var(--ar-font); font-weight: 600; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; margin: var(--cds-gap-xs) 0; display: block; min-height: 1.3em; }
+#dash-root .ar-kpi .sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+#dash-root .ar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: var(--cds-gap-md); }
+#dash-root .ar-card h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+#dash-root .ar-card .note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: var(--cds-gap-xs) 0 var(--cds-gap-md); line-height: 1.45; }
+#dash-root .ar-chart { position: relative; width: 100%; }
+#dash-root .ar-chart svg { display: block; }
+#dash-root .ar-chart text { font-family: var(--ar-font); }
+#dash-root .ar-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; z-index: 5; display: none; font-variant-numeric: tabular-nums; }
+#dash-root .ar-tip .t { color: var(--cds-text-secondary); margin-bottom: 2px; }
+#dash-root .ar-tip .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+#dash-root .ar-legend { display: flex; gap: var(--cds-gap-md); flex-wrap: wrap; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-bottom: var(--cds-gap-sm); }
+#dash-root .ar-legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+#dash-root .ar-fail { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: inherit; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+#dash-root .ar-fail i { width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); display: inline-block; }
+#dash-root [data-dash-source-state=empty] { color: transparent; }
+#dash-root [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+#dash-root .ar-search, #dash-root .ar-table th button { font-family: var(--ar-font); }
+#dash-root .ar-search { width: 100%; box-sizing: border-box; padding: var(--cds-pad-xs) var(--cds-pad-sm); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-bg); color: var(--color-fg); font: inherit; font-size: var(--cds-font-size-body); margin-bottom: var(--cds-gap-sm); }
+#dash-root .ar-tablebox { max-height: 30rem; overflow: auto; }
+#dash-root .ar-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+#dash-root .ar-table th { position: sticky; top: 0; background: var(--color-panel); text-align: left; padding: 0; border-bottom: 1px solid var(--color-border-line); z-index: 1; }
+#dash-root .ar-table th button { all: unset; cursor: pointer; display: block; padding: var(--cds-pad-xs) var(--cds-pad-sm); color: var(--color-fg-muted); font-weight: var(--cds-font-weight-medium); }
+#dash-root .ar-table th.n, #dash-root .ar-table td.n { text-align: right; }
+#dash-root .ar-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+#dash-root .ar-table td.title { min-width: 14rem; }
+#dash-root .ar-table td.nowrap { white-space: nowrap; }
+#dash-root .ar-table a { color: var(--color-fg); text-decoration: underline; text-decoration-color: var(--color-border-line); text-underline-offset: 2px; }
+#dash-root .ar-table .cat { color: var(--color-fg-muted); }
+#dash-root .ar-foot { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); line-height: 1.5; max-width: 60rem; }
+@media (max-width: 640px) { #dash-root .ar-table .hide-n { display: none; } }
+#dash-root .ar-chart g.row, #dash-root .ar-chart g.iss rect { transition: opacity 180ms ease; }
+#dash-root .ar-card { transition: border-color 200ms ease, box-shadow 200ms ease; }
+#dash-root .ar-card:hover { box-shadow: var(--cds-shadow-popover); }
+#dash-root .ar-tip { transition: left 90ms linear, top 90ms linear; }
+#dash-root .ar-road { position: relative; height: 54px; margin-top: var(--cds-gap-md); overflow: hidden; cursor: pointer; border-radius: var(--cds-radius); }
+#dash-root .ar-road .lane { position: absolute; left: 0; right: -30px; bottom: 9px; height: 0; border-top: 2px dashed var(--color-border-line); }
+#dash-root .ar-road .kerb { position: absolute; left: 0; right: 0; bottom: 4px; height: 1px; background: var(--color-border-line); }
+#dash-root .ar-car { position: absolute; bottom: 8px; left: calc(100% - 132px); width: 120px; height: 40px; }
+#dash-root .ar-car svg { display: block; width: 120px; height: 40px; overflow: visible; }
+#dash-root .ar-car .body { fill: var(--color-fg); }
+#dash-root .ar-car .glass { fill: var(--color-panel); }
+#dash-root .ar-car .tyre { fill: var(--color-fg); }
+#dash-root .ar-car .hub { fill: var(--color-panel); }
+#dash-root .ar-car .spoke { stroke: var(--color-fg); stroke-width: 1.4; stroke-linecap: round; }
+#dash-root .ar-car .head { fill: var(--color-warn); }
+#dash-root .ar-car .tail { fill: var(--color-bad); }
+#dash-root .ar-car .beam { fill: var(--color-warn); opacity: 0; }
+#dash-root .ar-car .shadow { fill: var(--color-fg); opacity: .12; }
+#dash-root .ar-car .wheel { transform-box: fill-box; transform-origin: center; }
+#dash-root .ar-road .hint { position: absolute; left: 0; bottom: 18px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); opacity: 0; transition: opacity 200ms ease; }
+#dash-root .ar-road:hover .hint { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  #dash-root .ar-road.go .ar-car { animation: ar-drive 2.8s cubic-bezier(.25,.6,.3,1) both; }
+  #dash-root .ar-road.go .ar-car svg { animation: ar-bob .28s ease-in-out 10 alternate; }
+  #dash-root .ar-road.go .wheel { animation: ar-spin .35s linear 8; }
+  #dash-root .ar-road.go .lane { animation: ar-lane .5s linear 5; }
+  #dash-root .ar-road.go .beam { animation: ar-flash .9s ease-out 2.7s both; }
+  #dash-root .ar-road.go .hint { opacity: 0; }
+  @keyframes ar-drive { from { left: -140px; } to { left: calc(100% - 132px); } }
+  @keyframes ar-bob { from { transform: translateY(0); } to { transform: translateY(-1.5px); } }
+  @keyframes ar-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes ar-lane { from { background-position: 0 0; transform: translateX(0); } to { transform: translateX(-24px); } }
+  @keyframes ar-flash { 0% { opacity: 0; } 20% { opacity: .55; } 40% { opacity: .1; } 60% { opacity: .55; } 100% { opacity: 0; } }
+}
+@media (prefers-reduced-motion: no-preference) {
+  #dash-root .ar-grow { animation: ar-grow calc(var(--cds-dur-slow) * 2.2) var(--cds-ease-out) both; transform-origin: left center; }
+  #dash-root .ar-rise { animation: ar-rise calc(var(--cds-dur-slow) * 2) var(--cds-ease-out) both; transform-origin: center bottom; }
+  #dash-root .ar-fadein { animation: ar-fadein calc(var(--cds-dur-slow) * 1.5) var(--cds-ease-out) both; }
+  #dash-root .ar-pop { animation: ar-pop calc(var(--cds-dur-slow) * 1.6) var(--cds-ease-out) both; transform-origin: center; }
+  #dash-root .ar-enter { animation: ar-enter calc(var(--cds-dur-slow) * 2) var(--cds-ease-out) both; }
+  #dash-root .ar-enter:nth-child(2) { animation-delay: 70ms; }
+  #dash-root .ar-enter:nth-child(3) { animation-delay: 140ms; }
+  #dash-root .ar-enter:nth-child(4) { animation-delay: 210ms; }
+  @keyframes ar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes ar-rise { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  @keyframes ar-fadein { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes ar-pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+  @keyframes ar-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+}
+</style>
+
+<div class="ar">
+  <header class="ar-head ar-enter" id="top">
+    <h1>Audi Reddit insights</h1>
+    <p class="ar-take" id="takeaway"><span class="dash-skeleton">&nbsp;</span></p>
+    <div class="ar-road go" id="road" role="button" tabindex="0" aria-label="Replay the car animation">
+      <div class="kerb"></div>
+      <div class="lane"></div>
+      <span class="hint">Click the road to drive again</span>
+      <div class="ar-car" aria-hidden="true">
+        <svg viewBox="0 0 120 40">
+          <ellipse class="shadow" cx="60" cy="38.5" rx="54" ry="2.2"/>
+          <path class="beam" d="M115 20 L150 13 L150 31 L115 23 Z"/>
+          <path class="body" d="M4 28 L4 22 Q4 19 8 18 L30 16 Q38 8 50 7 L72 7 Q82 7 92 15 L110 18 Q116 19 116 24 L116 28 Q116 30 113 30 L100 30 A11 11 0 0 0 78 30 L42 30 A11 11 0 0 0 20 30 L7 30 Q4 30 4 28 Z"/>
+          <path class="glass" d="M36 16 Q42 10.5 50 10 L60 10 L60 16 Z"/>
+          <path class="glass" d="M63 10 L72 10 Q80 10.5 86 16 L63 16 Z"/>
+          <rect class="head" x="110" y="20" width="5" height="2.6" rx="1"/>
+          <rect class="tail" x="5" y="20" width="4" height="2.6" rx="1"/>
+          <g class="wheel"><circle class="tyre" cx="31" cy="30" r="8"/><circle class="hub" cx="31" cy="30" r="4.2"/><line class="spoke" x1="31" y1="26.4" x2="31" y2="33.6"/><line class="spoke" x1="27.4" y1="30" x2="34.6" y2="30"/></g>
+          <g class="wheel"><circle class="tyre" cx="89" cy="30" r="8"/><circle class="hub" cx="89" cy="30" r="4.2"/><line class="spoke" x1="89" y1="26.4" x2="89" y2="33.6"/><line class="spoke" x1="85.4" y1="30" x2="92.6" y2="30"/></g>
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <section class="ar-kpis" id="kpis">
+    <div class="ar-card ar-kpi ar-enter">
+      <div class="lab">Posts analysed</div>
+      <span class="num dash-skeleton" data-source="kpis" data-field="posts" data-row="0">—</span>
+      <div class="sub">Unique posts after de-duplication</div>
+    </div>
+    <div class="ar-card ar-kpi ar-enter">
+      <div class="lab">Matched to an issue</div>
+      <span class="num dash-skeleton" data-source="categorized_share" data-field="share" data-row="0">—</span>
+      <div class="sub"><span data-source="kpis" data-field="categorized_posts" data-row="0">—</span> posts hit an issue keyword</div>
+    </div>
+    <div class="ar-card ar-kpi ar-enter">
+      <div class="lab">Linked to a model</div>
+      <span class="num dash-skeleton" data-source="kpis" data-field="posts_with_model" data-row="0">—</span>
+      <div class="sub">Named in the post, or from a model subreddit</div>
+    </div>
+    <div class="ar-card ar-kpi ar-enter">
+      <div class="lab">Comments on these posts</div>
+      <span class="num dash-skeleton" data-source="kpis" data-field="total_comments" data-row="0">—</span>
+      <div class="sub">Across <span data-source="kpis" data-field="subreddits" data-row="0">—</span> subreddits</div>
+    </div>
+  </section>
+
+  <section class="ar-grid">
+    <div class="ar-card ar-enter" id="issues">
+      <h2>What owners talk about</h2>
+      <p class="note">Posts per issue category. A post can hit several categories.</p>
+      <div class="ar-chart" id="c-issues" data-source="top_issues" style="min-height: 420px"></div>
+    </div>
+    <div class="ar-card ar-enter" id="engagement">
+      <h2>What gets the most replies</h2>
+      <p class="note">Average comments per post, by issue category. Highest is highlighted.</p>
+      <div class="ar-chart" id="c-engage" data-source="top_issues" style="min-height: 420px"></div>
+    </div>
+  </section>
+
+  <section class="ar-card ar-enter" id="models">
+    <h2>Most discussed models</h2>
+    <p class="note">Top 15 models by posts. Where a post names no model, the model subreddit it came from (r/AudiA4, r/AudiQ5…) is used.</p>
+    <div class="ar-legend" id="l-models" data-source="top_models"></div>
+    <div class="ar-chart" id="c-models" data-source="top_models" style="min-height: 440px"></div>
+  </section>
+
+  <section class="ar-card ar-enter" id="mix">
+    <h2>Issue mix by week</h2>
+    <p class="note">Share of each week's posts that mention the issue, Aug 11 to Sep 21, 2025. Darker is a larger share. Shares keep the uneven weekly volumes out of the comparison.</p>
+    <div class="ar-chart" id="c-mix" data-source="issue_mix_by_week" style="min-height: 460px"></div>
+  </section>
+
+  <section class="ar-grid">
+    <div class="ar-card ar-enter" id="daily">
+      <h2>Posts captured per day</h2>
+      <p class="note">Reddit's API returns about 1,000 posts per listing, so the backups cluster in late Aug and Sep 2025.</p>
+      <div class="ar-chart" id="c-daily" data-source="posts_by_day" style="min-height: 220px"></div>
+    </div>
+    <div class="ar-card ar-enter" id="subs">
+      <h2>Posts by subreddit</h2>
+      <p class="note">Where the posts came from.</p>
+      <div class="ar-chart" id="c-subs" data-source="subreddits" style="min-height: 300px"></div>
+    </div>
+  </section>
+
+  <section class="ar-card ar-enter" id="posts">
+    <h2>Most discussed posts</h2>
+    <p class="note">The 150 posts with the most comments. Search by title, model or issue; click a header to sort.</p>
+    <input class="ar-search" id="q-posts" type="search" placeholder="Search posts" aria-label="Search posts">
+    <div class="ar-tablebox">
+      <table class="ar-table" id="t-posts" data-source="top_posts" data-row-key="id">
+        <thead><tr>
+          <th data-field="title"><button type="button" data-k="title">Post</button></th>
+          <th data-field="subreddit" class="hide-n"><button type="button" data-k="subreddit">Subreddit</button></th>
+          <th data-field="car_model"><button type="button" data-k="car_model">Model</button></th>
+          <th data-field="issue_category" class="hide-n"><button type="button" data-k="issue_category">Issues</button></th>
+          <th data-field="comments" class="n"><button type="button" data-k="comments">Comments</button></th>
+          <th data-field="score" class="n hide-n"><button type="button" data-k="score">Score</button></th>
+          <th data-field="posted" class="hide-n"><button type="button" data-k="posted">Posted</button></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="ar-foot" id="method">How this was built: posts from r/Audi and nine model subreddits, pulled through the Reddit API, run through a bronze, silver and gold pipeline in DuckDB. Issue categories come from keyword matching on each post's title and body, so posts that describe a fault without a keyword (an "EPC light", say) stay unmatched. Collection dates: <span data-source="kpis" data-field="first_post" data-row="0">—</span> to <span data-source="kpis" data-field="last_post" data-row="0">—</span>, nearly all from Aug and Sep 2025.</p>
+</div>
+
+
+
+<p class="ar-repo">Built from <a href="https://github.com/themanbuildingpipelines/reddit-audi-pipeline">github.com/themanbuildingpipelines/reddit-audi-pipeline</a></p>
+</div>
+<script src="assets/d3.min.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/dash-shim.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

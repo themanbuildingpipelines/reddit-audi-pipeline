@@ -1,16 +1,11 @@
-# Reddit-audi-pipeline
+## Reddit Audi Pipeline
+<a href="https://themanbuildingpipelines.github.io/reddit-audi-pipeline/"> <img src="docs/images/00-intro.gif" alt="Audi Reddit insights dashboard: headline numbers and issue charts animating in" width="800"> </a>
+Open the interactive dashboard → Every chart below links to its live version, where you can hover for exact numbers and search the most discussed posts.
 
 ## Why this project
-![2020-audi-s5-sportback-311-1588268368](https://github.com/user-attachments/assets/c69ded4b-4009-469b-86ec-56050a4e29da)
-I have been an Audi fan for years now. I picture myself speeding with my Audi S5 to wherever the road takes me. 
-That aside, I'm in most of Audi subreddits and thought, why not create a project where I get to analyze
-what Audi cars are most loves, common issues with Audis, mods that are popular in the community, etc.
 
-## By the end of this project, I should be able to...
-1. Track patterns in upvotes, comments, and posting activity (e.g., which models get the most community attention).
-2. Identify common issues, popular modifications, and recurring themes in the Audi community.
-3. Compare mentions and engagement across Audi A4, A6, Q5, S5, R8, etc.
-4. Track patterns in upvotes, comments, and posting activity (e.g., which models get the most community attention).
+I've been an Audi fan for years and I spend a lot of time in the Audi subreddits. Owners there post about everything: a misfire on the highway, a new set of wheels, an S4 they just bought at auction. I wanted to turn that noise into answers. What do Audi owners actually struggle with? Which models get talked about most? And which conversations pull people in?
+So I built a pipeline that pulls posts from r/Audi and nine model subreddits, cleans them in layers and sorts each post into the part of the car it's about.
 
 ## Data Architecture
 <img width="1231" height="441" alt="Rakuten Data Pipeline High Level Architecture drawio" src="https://github.com/user-attachments/assets/da1e1920-04e1-4f19-9e0c-ccd38e7508a2" />
